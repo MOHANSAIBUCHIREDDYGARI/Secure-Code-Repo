@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>View File - Secure Code Repository</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="navbar">
+        <h2>{{ file_name }}</h2>
+        <div>
+            <a href="{{ url_for('view_repository', repo_id=repo_id) }}" class="btn">Back to Repository</a>
+            <a href="{{ url_for('download_content', file_id=file_id) }}" class="btn"
+                style="background: #27ae60;">Download</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>{{ file_name }}</h1>
+
+        <div class="integrity-check">
+            {% if integrity_check %}
+            <div style="margin-bottom: 10px;">
+                <span style="color: green; font-weight: bold;">✓ Integrity Verified</span>
+                <span style="color: #666;">(Hash matches)</span>
+            </div>
+            {% else %}
+            <div style="margin-bottom: 10px;">
+                <span style="color: red; font-weight: bold;">✗ Integrity Check Failed</span>
+            </div>
+            {% endif %}
+
+            {% if signature_valid %}
+            <div>
+                <span style="color: green; font-weight: bold;">✓ Identity Verified</span>
+                <span style="color: #666;">(Signed by {{ signer_name }})</span>
+            </div>
+            {% else %}
+            <div>
+                <span style="color: orange; font-weight: bold;">! Identity Unverified</span>
+                <span style="color: #666;">(Signature missing or invalid)</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="file-content">
+            <h3>Decrypted Content:</h3>
+            <pre><code>{{ content }}</code></pre>
+        </div>
+    </div>
+</body>
+
+</html>

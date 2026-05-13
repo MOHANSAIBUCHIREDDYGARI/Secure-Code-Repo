@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - Secure Code Repository</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="navbar">
+        <h2>Secure Code Repository</h2>
+        <div>
+            <span>Welcome, {{ username }}</span>
+            <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h1>My Repositories</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="section">
+            <h3>Create New Repository</h3>
+            <form method="POST" action="{{ url_for('create_repository') }}">
+                <div class="form-group">
+                    <label>Repository Name:</label>
+                    <input type="text" name="repo_name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea name="description" rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="btn">Create Repository</button>
+            </form>
+        </div>
+        
+        <div class="section">
+            <h3>Your Repositories</h3>
+            
+            {% if repositories %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Repository Name</th>
+                            <th>Role</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for repo in repositories %}
+                        <tr>
+                            <td>{{ repo[1] }}</td>
+                            <td><span class="badge">{{ repo[2] }}</span></td>
+                            <td>{{ repo[3] or 'No description' }}</td>
+                            <td>
+                                <a href="{{ url_for('view_repository', repo_id=repo[0]) }}" class="btn btn-small">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No repositories yet. Create one above!</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

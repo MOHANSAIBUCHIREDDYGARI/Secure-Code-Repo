@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{ repo_name }} - Secure Code Repository</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="navbar">
+        <h2>{{ repo_name }}</h2>
+        <div>
+            <a href="{{ url_for('dashboard') }}" class="btn">Back to Dashboard</a>
+            <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="repo-header">
+            <h1>{{ repo_name }}</h1>
+            <p>{{ description }}</p>
+            <p><strong>Your Role:</strong> <span class="badge">{{ role }}</span></p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% if qr_code %}
+        <div class="section">
+            <h3>Share Repository (QR Code)</h3>
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" style="max-width: 200px;">
+        </div>
+        {% endif %}
+
+        {% if can_write %}
+        <div class="section">
+            <h3>Upload File</h3>
+            <form method="POST" action="{{ url_for('upload_file', repo_id=repo_id) }}">
+                <div class="form-group">
+                    <label>File Name:</label>
+                    <input type="text" name="file_name" required placeholder="example.py">
+                </div>
+
+                <div class="form-group">
+                    <label>File Content:</label>
+                    <textarea name="file_content" rows="10" required></textarea>
+                </div>
+
+                <button type="submit" class="btn">Upload & Encrypt</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="section">
+            <h3>Files</h3>
+
+            {% if files %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Hash (Integrity)</th>
+                        <th>Uploaded</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in files %}
+                    <tr>
+                        <td>{{ file[1] }}</td>
+                        <td><code>{{ file[2][:16] }}...</code></td>
+                        <td>{{ file[3] }}</td>
+                        <td>
+                            <a href="{{ url_for('download_file', file_id=file[0]) }}" class="btn btn-small">View</a>
+                            <a href="{{ url_for('download_content', file_id=file[0]) }}" class="btn btn-small"
+                                style="background: #27ae60;">Download</a>
+                            {% if can_write %}
+                            <a href="{{ url_for('edit_file', file_id=file[0]) }}" class="btn btn-small"
+                                style="background: #f39c12;">Edit</a>
+                            {% endif %}
+                            {% if can_delete %}
+                            <form method="POST" action="{{ url_for('delete_file', file_id=file[0]) }}"
+                                style="display: inline;">
+                                <button type="submit" class="btn btn-small btn-delete"
+                                    style="background: #e74c3c;">Delete</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No files uploaded yet.</p>
+            {% endif %}
+        </div>
+
+        {% if role == 'Owner' %}
+        <div class="section">
+            <h3>Grant Access</h3>
+            <form method="POST" action="{{ url_for('grant_access_route', repo_id=repo_id) }}">
+                <div class="form-group">
+                    <label>Username:</label>
+                    <input type="text" name="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Role:</label>
+                    <select name="role" required>
+                        <option value="Viewer">Viewer (Read Only)</option>
+                        <option value="Collaborator">Collaborator (Read + Write)</option>
+                        <option value="Owner">Owner (Full Access)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn">Grant Access</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <h3>Repository Access List</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in repo_users %}
+                    <tr>
+                        <td>{{ user[0] }}</td>
+                        <td><span class="badge">{{ user[1] }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="danger-zone">
+            <h3>Danger Zone</h3>
+            <p>Deleting this repository will remove all files and history permanently. This action cannot be undone.</p>
+            <form method="POST" action="{{ url_for('delete_repository', repo_id=repo_id) }}"
+                onsubmit="return confirm('Are you sure you want to delete this repository? This action cannot be undone.');">
+                <button type="submit" class="btn btn-delete">Delete Repository</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>

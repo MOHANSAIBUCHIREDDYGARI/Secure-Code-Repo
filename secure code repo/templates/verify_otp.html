@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Verify OTP - Secure Code Repository</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Two-Factor Authentication</h1>
+        <p>Enter the 6-digit OTP sent to your email</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('verify_otp') }}">
+            <div class="form-group">
+                <label>OTP Code:</label>
+                <input type="text" name="otp" required maxlength="6" pattern="\d{6}">
+            </div>
+
+            <button type="submit" class="btn">Verify</button>
+            <p style="margin-top: 10px;"><a href="{{ url_for('resend_otp') }}">Resend OTP</a></p>
+        </form>
+    </div>
+</body>
+
+</html>
